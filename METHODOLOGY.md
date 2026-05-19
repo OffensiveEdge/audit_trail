@@ -153,9 +153,11 @@ Mode A and Mode B together give a complete proof for any historical prediction: 
 
 This repository is the public-facing artifact for an evolving integrity stack. Planned additions:
 
+- **Reproducible walk-forward backtest CLI**: a single command that produces a deterministic backtest report (Brier, log-loss, ECE, ROI) for the expanding-window walk-forward methodology (2022 train → 2023 test, then expanding through 2025). Hashes its inputs and outputs and folds the resulting report hash into the daily anchor. Will replace the assertion of "reproducible walk-forward" with a runnable proof of it.
+- **Manifest v4 — report hashes**: include the day's performance report content hash inside the salted manifest so claimed performance is bound by the same external timestamp as predictions and model registrations.
 - **Data lineage**: for each prediction, the upstream features (and the data sources they came from) will be hashed and anchored alongside the predictions. This closes the loop on the *input* side, complementing the model and prediction registrations on the *output* side.
 - **Independent third-party audit**: at appropriate revenue scale, a security firm will independently verify a sample of anchors and the chain of custody.
-- **OpenTimestamps**: redundant anchoring of the daily manifest hash to a public blockchain timestamp for very-long-term verification independent of GitHub's continued operation.
+- **OpenTimestamps upgrade automation**: weekly job that upgrades `.ots` proofs to full Bitcoin attestations via `ots upgrade`, removing the "pending calendar" state that brand-new anchors carry for the first few hours.
 
 The methodology in this document is versioned. If it changes materially, the previous version is retained in `methodology/` for historical reference.
 

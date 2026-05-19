@@ -38,22 +38,43 @@ Every weekday, after morning generation completes:
 3. The triples are sorted by `content_hash` and serialized to canonical JSON (sorted keys, no whitespace).
 4. A 32-byte random salt is generated for that day. The salt is stored privately.
 5. `manifest_hash = sha256(canonical_bytes || salt_bytes)` (concatenation).
-6. The anchor file `anchors/YYYY-MM-DD.json` is committed and pushed to this repository.
+6. The anchor file `anchors/YYYY-MM-DD.json`, plus any public `models/<model_id>.json` files for newly registered models, are committed and pushed to this repository in one push.
 
-The anchor file is small and contains only public information:
+The canonical manifest payload (v2) commits to both predictions and newly registered models in a single hash:
+
+```json
+{
+  "predictions": [
+    {"id": "<uuid>", "content_hash": "<sha256>", "recorded_at": "<ISO ts>"},
+    ...
+  ],
+  "new_models": [
+    {"model_id": "<id>", "artifact_sha256": "<sha256>", "recorded_at": "<ISO ts>"},
+    ...
+  ]
+}
+```
+
+`predictions` are sorted by `content_hash`, `new_models` by `model_id`. Empty arrays are allowed; a day with no new predictions but new model registrations still anchors.
+
+The public anchor file is small and contains only public counts:
 
 ```json
 {
   "anchor_date": "YYYY-MM-DD",
   "manifest_hash": "<64-char sha256>",
-  "row_count": <int>,
+  "prediction_count": <int>,
+  "new_model_count": <int>,
   "salted": true,
   "hash_algorithm": "sha256",
+  "manifest_schema_version": 2,
   "published_at": "<ISO 8601 UTC timestamp>"
 }
 ```
 
 Once published, the commit timestamp on GitHub is external evidence that this hash existed at that time. EdgeSeeker cannot alter the commit timestamp; GitHub records it.
+
+The manifest schema is versioned. v1 anchors (none yet published) hashed only the day's predictions as a bare JSON array. v2 (current) hashes a JSON object with `predictions` and `new_models` keys. Each anchor file declares its `manifest_schema_version` so verifiers can dispatch correctly.
 
 ## Per-prediction content hash
 

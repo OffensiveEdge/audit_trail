@@ -64,13 +64,25 @@ _CONTENT_HASH_FIELDS = (
 )
 
 
-def _canonical_day_payload(rows):
-    minimal = [
-        {"id": str(r["id"]), "content_hash": r["content_hash"], "recorded_at": r["recorded_at"]}
-        for r in rows
-    ]
-    minimal.sort(key=lambda x: x["content_hash"])
-    return json.dumps(minimal, sort_keys=True, separators=(",", ":")).encode("utf-8")
+def _canonical_day_payload(prediction_rows, model_rows):
+    predictions = sorted(
+        [
+            {"id": str(r["id"]), "content_hash": r["content_hash"], "recorded_at": r["recorded_at"]}
+            for r in prediction_rows
+        ],
+        key=lambda x: x["content_hash"],
+    )
+    models = sorted(
+        [
+            {"model_id": m["model_id"], "artifact_sha256": m["artifact_sha256"], "recorded_at": m["recorded_at"]}
+            for m in model_rows
+        ],
+        key=lambda x: x["model_id"],
+    )
+    return json.dumps(
+        {"predictions": predictions, "new_models": models},
+        sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
 
 
 def _canonical_row_payload(row):
@@ -88,13 +100,23 @@ def _load_salt(salt_path):
         return base64.b64decode(text)
 
 
-def _verify_anchor(date_str, predictions_path, salt_path, repo_root):
-    rows = json.loads(Path(predictions_path).read_text())
-    if not isinstance(rows, list) or not rows:
-        print("ERROR: predictions file must be a non-empty JSON array", file=sys.stderr)
+def _verify_anchor(date_str, predictions_path, models_path, salt_path, repo_root):
+    data = json.loads(Path(predictions_path).read_text())
+    if isinstance(data, list):
+        prediction_rows = data
+    elif isinstance(data, dict):
+        prediction_rows = data.get("predictions", [])
+    else:
+        print("ERROR: predictions file must be a JSON array or object", file=sys.stderr)
         return 2
+
+    model_rows = []
+    if models_path:
+        loaded = json.loads(Path(models_path).read_text())
+        model_rows = loaded.get("new_models", loaded) if isinstance(loaded, dict) else loaded
+
     salt = _load_salt(salt_path)
-    recomputed = hashlib.sha256(_canonical_day_payload(rows) + salt).hexdigest()
+    recomputed = hashlib.sha256(_canonical_day_payload(prediction_rows, model_rows) + salt).hexdigest()
 
     anchor_path = Path(repo_root) / "anchors" / f"{date_str}.json"
     if not anchor_path.exists():
@@ -106,8 +128,9 @@ def _verify_anchor(date_str, predictions_path, salt_path, repo_root):
     anchor = json.loads(anchor_path.read_text())
     published_hash = anchor.get("manifest_hash")
     if recomputed == published_hash:
-        print(f"PASS  anchor {date_str}: {len(rows)} rows hash to "
-              f"{recomputed[:16]}… which matches the published anchor")
+        print(f"PASS  anchor {date_str}: {len(prediction_rows)} predictions + "
+              f"{len(model_rows)} new model registrations hash to {recomputed[:16]}… "
+              f"which matches the published anchor")
         return 0
     print(f"FAIL  anchor {date_str}: recomputed {recomputed[:16]}…  "
           f"published {published_hash[:16]}…", file=sys.stderr)
@@ -146,6 +169,8 @@ def main():
     a = sub.add_parser("anchor", help="Verify a daily anchor (Mode A)")
     a.add_argument("--date", required=True, help="anchor date in YYYY-MM-DD")
     a.add_argument("--predictions", required=True, help="path to predictions subset JSON (id, content_hash, recorded_at)")
+    a.add_argument("--models", default=None,
+                   help="optional path to new_models subset JSON; required only on days whose anchor includes model registrations")
     a.add_argument("--salt", required=True, help="path to salt file (hex or base64)")
     a.add_argument("--repo-root", default=".", help="path to local clone of this repository (default: cwd)")
 
@@ -155,7 +180,7 @@ def main():
     args = p.parse_args()
 
     if args.mode == "anchor":
-        sys.exit(_verify_anchor(args.date, args.predictions, args.salt, args.repo_root))
+        sys.exit(_verify_anchor(args.date, args.predictions, args.models, args.salt, args.repo_root))
     if args.mode == "content":
         sys.exit(_verify_content(args.predictions))
 

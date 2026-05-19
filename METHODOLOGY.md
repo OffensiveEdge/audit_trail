@@ -40,7 +40,7 @@ Every weekday, after morning generation completes:
 5. `manifest_hash = sha256(canonical_bytes || salt_bytes)` (concatenation).
 6. The anchor file `anchors/YYYY-MM-DD.json`, plus any public `models/<model_id>.json` files for newly registered models, are committed and pushed to this repository in one push.
 
-The canonical manifest payload (v2) commits to both predictions and newly registered models in a single hash:
+The canonical manifest payload (v3) commits to predictions, newly registered models, AND the verifier itself in a single hash:
 
 ```json
 {
@@ -51,13 +51,16 @@ The canonical manifest payload (v2) commits to both predictions and newly regist
   "new_models": [
     {"model_id": "<id>", "artifact_sha256": "<sha256>", "recorded_at": "<ISO ts>"},
     ...
-  ]
+  ],
+  "verifier_sha256": "<sha256 of verify.py at time of anchor>"
 }
 ```
 
-`predictions` are sorted by `content_hash`, `new_models` by `model_id`. Empty arrays are allowed; a day with no new predictions but new model registrations still anchors.
+`predictions` are sorted by `content_hash`, `new_models` by `model_id`. Empty arrays are allowed; a day with no new predictions or new models still anchors so long as the verifier hash is committed.
 
-The public anchor file is small and contains only public counts:
+Including the verifier's own hash in the manifest prevents a future tampered `verify.py` from silently re-verifying past anchors. The verifier self-checks: it computes its own sha256 at runtime and refuses to run if the anchor it's verifying was published against a different verifier.
+
+The public anchor file is small and contains only public counts plus the verifier hash:
 
 ```json
 {
@@ -65,16 +68,17 @@ The public anchor file is small and contains only public counts:
   "manifest_hash": "<64-char sha256>",
   "prediction_count": <int>,
   "new_model_count": <int>,
+  "verifier_sha256": "<64-char sha256>",
   "salted": true,
   "hash_algorithm": "sha256",
-  "manifest_schema_version": 2,
+  "manifest_schema_version": 3,
   "published_at": "<ISO 8601 UTC timestamp>"
 }
 ```
 
 Once published, the commit timestamp on GitHub is external evidence that this hash existed at that time. EdgeSeeker cannot alter the commit timestamp; GitHub records it.
 
-The manifest schema is versioned. v1 anchors (none yet published) hashed only the day's predictions as a bare JSON array. v2 (current) hashes a JSON object with `predictions` and `new_models` keys. Each anchor file declares its `manifest_schema_version` so verifiers can dispatch correctly.
+The manifest schema is versioned. v1 anchors (never published) hashed only predictions. v2 (never published) added new_models. v3 (current) adds verifier_sha256. Each anchor file declares its `manifest_schema_version` so verifiers can dispatch correctly.
 
 ## Per-prediction content hash
 

@@ -64,7 +64,11 @@ _CONTENT_HASH_FIELDS = (
 )
 
 
-def _canonical_day_payload(prediction_rows, model_rows):
+def _self_sha256():
+    return hashlib.sha256(Path(__file__).resolve().read_bytes()).hexdigest()
+
+
+def _canonical_day_payload(prediction_rows, model_rows, verifier_sha256):
     predictions = sorted(
         [
             {"id": str(r["id"]), "content_hash": r["content_hash"], "recorded_at": r["recorded_at"]}
@@ -80,7 +84,7 @@ def _canonical_day_payload(prediction_rows, model_rows):
         key=lambda x: x["model_id"],
     )
     return json.dumps(
-        {"predictions": predictions, "new_models": models},
+        {"predictions": predictions, "new_models": models, "verifier_sha256": verifier_sha256},
         sort_keys=True, separators=(",", ":"),
     ).encode("utf-8")
 
@@ -116,7 +120,10 @@ def _verify_anchor(date_str, predictions_path, models_path, salt_path, repo_root
         model_rows = loaded.get("new_models", loaded) if isinstance(loaded, dict) else loaded
 
     salt = _load_salt(salt_path)
-    recomputed = hashlib.sha256(_canonical_day_payload(prediction_rows, model_rows) + salt).hexdigest()
+    verifier_hash = _self_sha256()
+    recomputed = hashlib.sha256(
+        _canonical_day_payload(prediction_rows, model_rows, verifier_hash) + salt
+    ).hexdigest()
 
     anchor_path = Path(repo_root) / "anchors" / f"{date_str}.json"
     if not anchor_path.exists():
@@ -127,10 +134,20 @@ def _verify_anchor(date_str, predictions_path, models_path, salt_path, repo_root
 
     anchor = json.loads(anchor_path.read_text())
     published_hash = anchor.get("manifest_hash")
+    anchored_verifier = anchor.get("verifier_sha256")
+    if anchored_verifier and anchored_verifier != verifier_hash:
+        print(f"FAIL  verifier mismatch: this verify.py hashes to {verifier_hash[:16]}… "
+              f"but anchor {date_str} expects {anchored_verifier[:16]}…", file=sys.stderr)
+        print("      The verifier has been altered since this anchor was published. "
+              "Refusing to verify; recheck out the repository at the commit that "
+              "produced this anchor and re-run.", file=sys.stderr)
+        return 1
+
     if recomputed == published_hash:
         print(f"PASS  anchor {date_str}: {len(prediction_rows)} predictions + "
               f"{len(model_rows)} new model registrations hash to {recomputed[:16]}… "
-              f"which matches the published anchor")
+              f"which matches the published anchor "
+              f"(verifier_sha256 {verifier_hash[:16]}… also matches)")
         return 0
     print(f"FAIL  anchor {date_str}: recomputed {recomputed[:16]}…  "
           f"published {published_hash[:16]}…", file=sys.stderr)

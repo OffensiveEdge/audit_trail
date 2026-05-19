@@ -1,0 +1,14 @@
+{
+  "artifact_sha256": "a7cd917c3a0d9e29136d2b05e21e2f56b2dbcf5fc42d8ae2a7aac9822c3e8361",
+  "artifact_size_bytes": 2547606,
+  "code_commit_sha": "8ca5360d27bac804fd41e329f0f8a35f7a646262",
+  "dataset": "pm",
+  "model_id": "2022_2025_2351126614",
+  "prediction_type": "gamewinner",
+  "recorded_at": "2026-05-19T16:12:38.903781+00:00",
+  "recovered": true,
+  "reproducible": true,
+  "sport": "ncaaf",
+  "training_window_end": "2025-12-31",
+  "training_window_start": "2022-01-01"
+}

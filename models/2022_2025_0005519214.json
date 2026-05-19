@@ -1,0 +1,14 @@
+{
+  "artifact_sha256": "2863fc6c1f81dfc1b9f9496d564b2f656c9d9455f76e6d512aa754b97bbaa51b",
+  "artifact_size_bytes": 18314950,
+  "code_commit_sha": "8ca5360d27bac804fd41e329f0f8a35f7a646262",
+  "dataset": "pb",
+  "model_id": "2022_2025_0005519214",
+  "prediction_type": "gamewinner",
+  "recorded_at": "2026-05-19T16:13:38.023411+00:00",
+  "recovered": true,
+  "reproducible": true,
+  "sport": "mlb",
+  "training_window_end": "2025-12-31",
+  "training_window_start": "2022-01-01"
+}

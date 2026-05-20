@@ -1,0 +1,13 @@
+{
+  "_note": "Synthetic fixture for demonstrating verify.py. No real predictions.",
+  "anchor_date": "2099-01-01",
+  "hash_algorithm": "sha256",
+  "manifest_hash": "063cad362c07505b6aec2b5a60dd6a376048be242c4ca1cfd1809ea0d1fe6b96",
+  "manifest_schema_version": 3,
+  "new_model_count": 1,
+  "prediction_count": 20,
+  "published_at": "2099-01-01T13:00:00+00:00",
+  "salted": true,
+  "sample": true,
+  "verifier_sha256": "5357b7c2d2dd5936f61b33245478304f0e6e5d1328b8415248e570f7994fbbfd"
+}

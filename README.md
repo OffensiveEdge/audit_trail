@@ -28,6 +28,10 @@ verify.py                 Pure-stdlib Python 3 script that lets anyone
                           prediction's content hash.
 
 METHODOLOGY.md            Full protocol description.
+
+sample/                   Synthetic, runnable fixture so anyone can exercise
+                          verify.py end-to-end without a contract or any real
+                          EdgeSeeker data. See sample/README.md.
 ```
 
 ## Quick verification
@@ -48,6 +52,28 @@ And to confirm an individual prediction's value was not altered:
 python verify.py content --predictions predictions_full.json
 # PASS  content: all 47 rows' content_hash values match the recomputed canonical hash of their prediction fields
 ```
+
+## Try it without a contract
+
+If you just want to confirm `verify.py` works as described — without an NDA, contract, or any real EdgeSeeker data — run it against the synthetic fixture in [`sample/`](sample/):
+
+```bash
+git clone https://github.com/OffensiveEdge/audit_trail.git
+cd audit_trail
+
+# Per-row content hashes
+python verify.py content --predictions sample/predictions_full.json
+
+# Daily anchor verification
+python verify.py anchor \
+  --date 2099-01-01 \
+  --predictions sample/predictions_subset.json \
+  --models sample/models.json \
+  --salt sample/salt.hex \
+  --repo-root sample/
+```
+
+Both should print `PASS`. Everything in `sample/` is fabricated — no real predictions, features, or model parameters are exposed. See [`sample/README.md`](sample/README.md) for the full description of what the fixture proves (and doesn't).
 
 ## Full protocol
 

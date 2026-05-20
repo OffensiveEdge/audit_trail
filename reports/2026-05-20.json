@@ -1,0 +1,20 @@
+{
+  "audit_trail_row_count": 0,
+  "calibration_curve": [],
+  "methodology_version": "v1.0-2026-05-20",
+  "metrics": {
+    "by_model_id": {},
+    "by_sport": {},
+    "overall": {
+      "brier": null,
+      "ece": null,
+      "hit_rate": null,
+      "log_loss": null,
+      "n": 0
+    },
+    "roi_percent": null
+  },
+  "outcomes_resolved_count": 0,
+  "published_at": "2026-05-20T11:30:00.216480+00:00",
+  "report_date": "2026-05-20"
+}

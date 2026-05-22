@@ -1,0 +1,11 @@
+{
+  "anchor_date": "2026-05-22",
+  "hash_algorithm": "sha256",
+  "manifest_hash": "7b66e8c07f4073ec95fb254b88e7d3b1f08e3284fd65acfc8704059cd4884d24",
+  "manifest_schema_version": 3,
+  "new_model_count": 0,
+  "prediction_count": 30,
+  "published_at": "2026-05-22T13:00:04.267741+00:00",
+  "salted": true,
+  "verifier_sha256": "5357b7c2d2dd5936f61b33245478304f0e6e5d1328b8415248e570f7994fbbfd"
+}

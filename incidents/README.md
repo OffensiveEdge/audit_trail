@@ -50,4 +50,6 @@ For any qualifying incident:
 
 ## Current state
 
-No disclosed incidents.
+- [`2026-05-29-duplicate-intermediate-anchors.md`](2026-05-29-duplicate-intermediate-anchors.md)
+  — two MLB non-bet predictions on 2026-05-24 each received a duplicate intermediate
+  audit row from a mid-run line move. No customer impact; root cause fixed. Resolved.

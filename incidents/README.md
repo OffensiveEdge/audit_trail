@@ -53,3 +53,7 @@ For any qualifying incident:
 - [`2026-05-29-duplicate-intermediate-anchors.md`](2026-05-29-duplicate-intermediate-anchors.md)
   — two MLB non-bet predictions on 2026-05-24 each received a duplicate intermediate
   audit row from a mid-run line move. No customer impact; root cause fixed. Resolved.
+- [`2026-05-31-ingestion-outage-missed-slate.md`](2026-05-31-ingestion-outage-missed-slate.md)
+  — a data-ingestion outage suppressed MLB predictions 2026-05-28 → 2026-05-31 and
+  caused no daily anchor to publish for 2026-05-31. No customer impact; no ledger row
+  altered; ingestion fixed and inputs backfilled. Resolved.

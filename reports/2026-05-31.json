@@ -1,0 +1,98 @@
+{
+  "audit_trail_row_count": 19,
+  "calibration_curve": [
+    {
+      "bin": "0.6\u20130.7",
+      "n": 14,
+      "observed_frequency": 0.7143,
+      "predicted_probability_avg": 0.6517
+    },
+    {
+      "bin": "0.7\u20130.8",
+      "n": 5,
+      "observed_frequency": 1.0,
+      "predicted_probability_avg": 0.7073
+    }
+  ],
+  "methodology_version": "v1.0-2026-05-20",
+  "metrics": {
+    "by_model_id": {
+      "2022_2025_0002475314": {
+        "brier": 0.165942,
+        "ece": 0.254677,
+        "hit_rate": 0.8,
+        "log_loss": 0.516449,
+        "n": 5
+      },
+      "2022_2025_0004128914": {
+        "brier": 0.112064,
+        "ece": 0.33476,
+        "hit_rate": 1.0,
+        "log_loss": 0.407607,
+        "n": 1
+      },
+      "2022_2025_0004159614": {
+        "brier": 0.202047,
+        "ece": 0.029723,
+        "hit_rate": 0.666667,
+        "log_loss": 0.59282,
+        "n": 3
+      },
+      "2022_2025_0005434314": {
+        "brier": 0.257849,
+        "ece": 0.30638,
+        "hit_rate": 0.5,
+        "log_loss": 0.707288,
+        "n": 4
+      },
+      "2022_2025_0005519214": {
+        "brier": 0.121366,
+        "ece": 0.347195,
+        "hit_rate": 1.0,
+        "log_loss": 0.427422,
+        "n": 5
+      },
+      "2022_2025_0007159714": {
+        "brier": 0.119471,
+        "ece": 0.345646,
+        "hit_rate": 1.0,
+        "log_loss": 0.424107,
+        "n": 1
+      }
+    },
+    "by_sport": {
+      "mlb": {
+        "brier": 0.12105,
+        "ece": 0.346937,
+        "hit_rate": 1.0,
+        "log_loss": 0.426869,
+        "n": 6
+      },
+      "nba": {
+        "brier": 0.156962,
+        "ece": 0.156437,
+        "hit_rate": 0.833333,
+        "log_loss": 0.498309,
+        "n": 6
+      },
+      "nhl": {
+        "brier": 0.233934,
+        "ece": 0.162336,
+        "hit_rate": 0.571429,
+        "log_loss": 0.65823,
+        "n": 7
+      }
+    },
+    "overall": {
+      "brier": 0.173979,
+      "ece": 0.123125,
+      "hit_rate": 0.789474,
+      "log_loss": 0.534668,
+      "n": 19
+    },
+    "roi_percent": null
+  },
+  "outcomes_resolved_count": 19,
+  "published_at": "2026-05-31T11:30:00.433456+00:00",
+  "report_date": "2026-05-31"
+}

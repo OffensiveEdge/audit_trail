@@ -110,6 +110,8 @@ The artifact bytes themselves are stored privately. Under contract, EdgeSeeker p
 
 Model registrations are anchored into the next daily manifest hash after they are committed, so the model lineage is bound to the same external timestamps as the predictions.
 
+From 2026-06-01, the private registration additionally records the model's held-out validation metrics (ROC-AUC, F1, precision, recall, balanced accuracy, MCC, accuracy) captured at registration. These are not printed in the public file above, but they live inside the artifact archive (`metrics.json`) whose `artifact_sha256` is published here and anchored — so under the same bytes-disclosure contract, a customer verifies the metrics against the anchored hash, with no change to the manifest format. Models registered before that date predate the field; their training-time performance is provided via reproducible walk-forward backtest.
+
 ## Performance and calibration reports
 
 The `reports/` directory contains periodic performance metrics computed from the audit trail joined with game outcomes:

@@ -10,6 +10,28 @@ JSON files and the daily anchors that committed them.
 
 ---
 
+## 2026-06-01 — model registry now records held-out validation metrics
+
+From this date, every newly registered model carries its held-out validation
+metrics in the registry: ROC-AUC, F1, precision, recall, balanced accuracy, MCC,
+and accuracy, alongside the validation mode, best optimization score, and train /
+validation record counts. These are the numbers produced during purged temporal
+cross-validation at training time — model *quality*, disclosed in full.
+
+The metrics are anchored exactly like everything else: each model's `metrics.json`
+lives inside the artifact directory whose content hash (`artifact_sha256`) is
+already committed into the daily manifest. So these numbers share the same external
+Bitcoin timestamp as the predictions — they cannot be backdated or quietly revised
+after the fact. **The daily manifest format is unchanged (stays v3);** this is a
+field added to the private registry, not a change to the anchor protocol or
+`verify.py`.
+
+Models registered **before** this date predate the field and have no metrics
+recorded — absent because they were registered before metrics capture existed,
+**not** because anything was omitted or cherry-picked. Their training-time
+performance is available via reproducible walk-forward backtest. Going forward,
+every model's quality is on the public record from the day it is born.
+
 ## 2026-05-20 — bootstrap registration of initial production models
 
 Sixteen models currently in production were formally registered into the immutable

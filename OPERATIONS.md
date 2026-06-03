@@ -4,9 +4,9 @@ This document describes the operational posture supporting the integrity claims 
 
 ## Hosting
 
-- **Application + scheduler**: a single Hetzner Cloud server in Helsinki, Finland (`5.78.208.0`). All PM2 processes (predictions API, scoring, training, analysis, inference, the morning generation job, and the audit anchor publisher) run here. Reverse-proxied via Caddy. Tailnet-gated for all internal endpoints.
+- **Application + scheduler**: a single Hetzner Cloud server in Helsinki, Finland. All prediction, scoring, training, analysis, inference, morning-generation, and audit-anchor processes run here, reverse-proxied via Caddy. Internal endpoints are tailnet-gated (not publicly reachable).
 - **Database**: Supabase Cloud (Postgres + Storage). All audit ledgers (`audit_trail`, `audit_anchors`, `audit_models`) and the private `models/` Storage bucket are hosted here. (Per-day anchor salts are stored as the `salt` column on `audit_anchors`, not a separate table.)
-- **Source control**: self-hosted Gitea on the same Hetzner server (private; `gitea.offensiveedge.com`, tailnet only).
+- **Source control**: self-hosted Gitea on the same server (private, tailnet-only).
 - **Public anchor repository**: `github.com/OffensiveEdge/audit_trail` (public).
 - **Scheduler**: n8n in a Docker container on the Hetzner server. Runs the morning generation trigger (08:00 ET) and the audit anchor publisher (09:00 ET).
 

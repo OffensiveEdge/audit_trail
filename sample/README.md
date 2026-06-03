@@ -70,9 +70,11 @@ To verify a real anchor with `verify.py` you need:
 With those three, `verify.py` confirms the rows match the published anchor, and
 that anchor's GitHub commit timestamp is the external proof of when it existed.
 Separately — and *not* via `verify.py` — each anchor has an OpenTimestamps proof
-at `anchors/YYYY-MM-DD.json.ots` that stamps it against the Bitcoin blockchain;
-you check that yourself with the `ots` tool if you want the Bitcoin attestation
-in addition to the GitHub timestamp.
+at `anchors/YYYY-MM-DD.json.ots` that stamps it against the Bitcoin blockchain.
+Check that with the supplemental `verify_bitcoin.py` (`pip install
+opentimestamps-client` first) if you want the Bitcoin attestation in addition to
+the GitHub timestamp — see the README's "Supplemental: Bitcoin attestation"
+section.
 
 The sandbox skips items 1 and 2 (no real rows or salt) and the Bitcoin proof.
 Item 3 is replaced by the synthetic anchor at `sample/anchors/2099-01-01.json`.

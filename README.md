@@ -78,6 +78,20 @@ python verify.py anchor \
 
 Both should print `PASS`. Everything in `sample/` is fabricated — no real predictions, features, or model parameters are exposed. See [`sample/README.md`](sample/README.md) for the full description of what the fixture proves (and doesn't).
 
+## Supplemental: Bitcoin attestation (optional)
+
+`verify.py` proves predictions → anchor file, dated by that file's **GitHub commit timestamp**, with zero dependencies and no network. Each anchor *also* carries an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) that stamps it to the **Bitcoin** blockchain — an independent timestamp that doesn't rely on trusting GitHub's clock. Checking that is an **optional, supplemental** step, kept in a separate script so the core verifier stays pure-stdlib and offline:
+
+```bash
+pip install opentimestamps-client          # the `ots` reference client
+python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
+python verify_bitcoin.py --date 2026-05-20  # one anchor
+python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network
+python verify_bitcoin.py --digests          # just the anchor hashes, no ots
+```
+
+`verify_bitcoin.py` verifies *through* the OpenTimestamps reference client — it never reimplements Bitcoin/merkle validation. For each anchor it confirms the `.ots` proof commits to the exact `sha256` of that anchor file (the same file `verify.py` matched your predictions to), then resolves the Bitcoin attestation to a block + time. The published `.ots` proofs are **upgraded and self-contained** — each carries its Bitcoin block attestation directly, so verification never depends on an OpenTimestamps calendar staying online. **Trust note:** the merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned is fine — it keeps every block header, which is all the proof needs). The client has **no public-explorer fallback**, and that is deliberate: needing your own node is what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify_bitcoin.py --help`.
+
 ## Full protocol
 
 See [METHODOLOGY.md](METHODOLOGY.md) for the full specification: anchor protocol, per-prediction content hash, model registration, performance reports, and disclosed pre-ledger reconstructed data.

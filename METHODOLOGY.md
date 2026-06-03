@@ -142,7 +142,7 @@ python verify.py anchor --date 2026-05-20 \
   --predictions predictions_subset.json --salt salt.hex
 ```
 
-Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file. (The `--predictions` and `--salt` files are supplied under contract and are not in this public repo. To exercise `verify.py` end-to-end with no contract, run it against the synthetic fixture in `sample/` — see `sample/README.md`.) `verify.py` validates the manifest hash and the GitHub-committed anchor; the matching `.ots` Bitcoin proof is checked separately with the OpenTimestamps `ots` tool, not by this script.
+Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file. (The `--predictions` and `--salt` files are supplied under contract and are not in this public repo. To exercise `verify.py` end-to-end with no contract, run it against the synthetic fixture in `sample/` — see `sample/README.md`.) `verify.py` validates the manifest hash and the GitHub-committed anchor; the matching `.ots` Bitcoin proof is checked separately by the supplemental `verify_bitcoin.py` (which wraps the OpenTimestamps `ots` client), not by `verify.py` itself — that keeps the core verifier pure-stdlib and offline. See the "Verification" steps below.
 
 ### Mode B — content verification
 
@@ -153,6 +153,18 @@ python verify.py content --predictions predictions_full.json
 For each row, recomputes `sha256(canonical_json(prediction_fields))` and confirms it matches the row's published `content_hash`. If it does, the prediction values are exactly what EdgeSeeker committed to.
 
 Mode A and Mode B together give a complete proof for any historical prediction: *this exact prediction* existed at *this exact time*.
+
+### Supplemental — Bitcoin attestation (optional)
+
+Modes A/B date an anchor by its **GitHub commit timestamp**. Each anchor also has an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) stamping it to the **Bitcoin** blockchain — an independent timestamp that does not rely on GitHub's clock. This is checked by a separate script so the core verifier keeps its pure-stdlib, offline, zero-dependency property:
+
+```bash
+pip install opentimestamps-client          # the `ots` reference client
+python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
+python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network
+```
+
+`verify_bitcoin.py` verifies *through* the OpenTimestamps reference client (it never reimplements Bitcoin/merkle validation): for each anchor it confirms the `.ots` proof commits to the exact `sha256` of the anchor file Mode A matched, then resolves the attestation to a Bitcoin block + time. The published `.ots` proofs are upgraded and self-contained — each carries its Bitcoin block attestation directly, so verification does not depend on any OpenTimestamps calendar remaining online. The merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned suffices — it retains every block header); the client has no public-explorer fallback, which is precisely what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify_bitcoin.py --help`.
 
 ## Roadmap
 

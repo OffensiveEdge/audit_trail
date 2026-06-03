@@ -21,7 +21,7 @@ The `service_role` Supabase key is currently held by:
 
 This is a single-operator setup. EdgeSeeker discloses this rather than hide it: the operator can in theory disable the immutability triggers, write rows, and re-enable triggers without external evidence. Mitigations:
 
-- Triggers themselves live in DDL that is version-controlled (`service/server/supabase/schema/`) and any change to them appears in git history.
+- Triggers themselves live in DDL that is version-controlled (`service/server/supabase/schema.sql`) and any change to them appears in git history.
 - The daily anchor pushed to GitHub commits the *content* of the audit ledger; any retroactive insertion after a daily anchor that does not match would fail Mode A verification.
 - An external third-party audit of the operator's access logs is planned (see "Roadmap").
 
@@ -42,11 +42,11 @@ This is a single-operator setup. EdgeSeeker discloses this rather than hide it: 
 
 | Key / credential | Holder | Storage | Notes |
 |---|---|---|---|
-| Supabase `service_role` key | Operator | `.env` files (Hetzner + laptop), 1Password vault | Rotate quarterly |
+| Supabase `service_role` key | Operator | Doppler (`edgeseeker` prd/web_prd); 1Password (operator escrow) | Rotate quarterly |
 | GitHub deploy key (audit_trail) | Hetzner box | `~/.ssh/audit_trail_deploy` | Read-write to one repo only |
 | Per-day anchor salts | Supabase `audit_anchors.salt` column | Service-role only; covered by Supabase daily backups | Treat backups like keys |
-| n8n API key | Hetzner | `service/server/.env` | Used only for n8n workflow management |
-| `OPS_BACKUPS_TOKEN` | Hetzner | `.env` files | Shared between services + n8n |
+| n8n API key | Hetzner | Doppler (`edgeseeker` prd) | Used only for n8n workflow management |
+| `OPS_BACKUPS_TOKEN` | Hetzner | Doppler (`edgeseeker` prd); mirrored to service `.env.local` for local dev | Shared between services + n8n |
 
 Key rotation is a manual procedure today. Automated rotation is on the roadmap.
 

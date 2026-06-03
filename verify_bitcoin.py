@@ -23,9 +23,9 @@ HOW TO FULLY EXERCISE THIS (the trustless / gold-standard path)
 --------------------------------------------------------------------------------
 
 Prerequisites
-  - The OpenTimestamps reference client:   pip install opentimestamps-client
-    (provides the `ots` command). We verify THROUGH the reference client and
-    never reimplement Bitcoin/merkle validation.
+  - The OpenTimestamps reference client:   pip install -r requirements-bitcoin.txt
+    (opentimestamps-client==0.7.2, pinned; provides the `ots` command). We verify
+    THROUGH the reference client and never reimplement Bitcoin/merkle validation.
   - A LOCAL BITCOIN NODE (Bitcoin Core; pruned is fine -- it keeps every block
     header, which is all an OTS proof needs). This is REQUIRED for the actual
     Bitcoin check, not optional. See the trust model below.
@@ -111,7 +111,7 @@ def _classify_verify(combined: str) -> tuple[str, str]:
     {confirmed, pending, no_node, failed}."""
     low = combined.lower()
     if ("could not connect to bitcoin" in low or "cookie file" in low
-            or "no bitcoin" in low or "bitcoin node" in low and "connect" in low):
+            or "no bitcoin" in low or ("bitcoin node" in low and "connect" in low)):
         return "no_node", "no local Bitcoin node reachable -- required for the trustless check (no explorer fallback)"
     m = _BLOCK_RE.search(combined)
     if m:
@@ -180,8 +180,8 @@ def main() -> int:
     ots = _ots_path()
     if ots is None:
         print("ERROR: the `ots` command was not found.\n"
-              "       Install the OpenTimestamps reference client:\n"
-              "           pip install opentimestamps-client\n"
+              "       Install the OpenTimestamps reference client (pinned):\n"
+              "           pip install -r requirements-bitcoin.txt\n"
               "       (--digests works without it -- prints the anchor file hashes.)",
               file=sys.stderr)
         return 2

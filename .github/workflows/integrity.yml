@@ -17,9 +17,11 @@ permissions:
 
 jobs:
   append-only-guard:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      # Pinned to an immutable commit SHA (not a mutable @v4 tag) for supply-chain
+      # integrity. Resolved from actions/checkout@v4 on 2026-06-03.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
       - name: Append-only ledger guard

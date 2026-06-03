@@ -39,6 +39,8 @@ sample/                   Synthetic, runnable fixture so anyone can exercise
 
 ## Quick verification
 
+> **Requirements:** `verify.py` is pure Python standard library — **Python 3.8+**, no third-party packages, no network. (The optional Bitcoin check, `verify_bitcoin.py`, has one pinned dependency — see below.)
+
 If you are a contracted customer and have been given a set of predictions and the day's salt, you can confirm they match the public anchor:
 
 ```bash
@@ -83,7 +85,7 @@ Both should print `PASS`. Everything in `sample/` is fabricated — no real pred
 `verify.py` proves predictions → anchor file, dated by that file's **GitHub commit timestamp**, with zero dependencies and no network. Each anchor *also* carries an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) that stamps it to the **Bitcoin** blockchain — an independent timestamp that doesn't rely on trusting GitHub's clock. Checking that is an **optional, supplemental** step, kept in a separate script so the core verifier stays pure-stdlib and offline:
 
 ```bash
-pip install opentimestamps-client          # the `ots` reference client
+pip install -r requirements-bitcoin.txt    # the `ots` client (opentimestamps-client==0.7.2, pinned)
 python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
 python verify_bitcoin.py --date 2026-05-20  # one anchor
 python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network

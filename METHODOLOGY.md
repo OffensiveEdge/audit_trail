@@ -159,7 +159,7 @@ Mode A and Mode B together give a complete proof for any historical prediction: 
 Modes A/B date an anchor by its **GitHub commit timestamp**. Each anchor also has an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) stamping it to the **Bitcoin** blockchain — an independent timestamp that does not rely on GitHub's clock. This is checked by a separate script so the core verifier keeps its pure-stdlib, offline, zero-dependency property:
 
 ```bash
-pip install opentimestamps-client          # the `ots` reference client
+pip install -r requirements-bitcoin.txt    # the `ots` client (opentimestamps-client==0.7.2, pinned)
 python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
 python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network
 ```

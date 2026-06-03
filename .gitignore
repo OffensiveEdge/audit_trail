@@ -1,0 +1,18 @@
+# OS / editor cruft
+.DS_Store
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OpenTimestamps upgrade leaves these; they are debris, never commit them
+*.ots.bak
+
+# Local-only working files (predictions/salts provided under contract are never
+# committed; the sample/ fixture is intentionally tracked and must NOT be ignored)
+/predictions*.json
+/salt.hex

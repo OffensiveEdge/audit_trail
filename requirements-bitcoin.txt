@@ -1,0 +1,7 @@
+# Optional — only for verify_bitcoin.py (the supplemental Bitcoin-attestation
+# check). verify.py itself has ZERO dependencies and needs none of this.
+#
+# Pinned to the version this repository's proofs were verified against. The
+# `ots` CLI it provides also requires a local Bitcoin Core node for the
+# trustless check — see verify_bitcoin.py's docstring.
+opentimestamps-client==0.7.2

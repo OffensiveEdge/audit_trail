@@ -22,8 +22,9 @@ THE SOFTWARE.
 
 ---
 
-Note on scope: this MIT license covers the verification code (`verify.py`)
-and the publicly-committed ledger artifacts in this repository (anchors,
-reports, model registrations, methodology, operations docs). The underlying
+Note on scope: this MIT license covers the verification code (`verify.py` and
+the supplemental `verify_bitcoin.py`) and the publicly-committed ledger
+artifacts in this repository (anchors, reports, model registrations,
+methodology, operations docs). The underlying
 EdgeSeeker predictions, salts, and model binaries themselves remain private
 and are provided only under contract — they are not part of this repository.

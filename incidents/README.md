@@ -32,8 +32,8 @@ For any qualifying incident:
 
 - A bug that caused predictions delivered to customers to use stale, incorrect,
   or post-game data
-- A loss or corruption of audit_trail, audit_anchors, audit_models, or
-  audit_anchor_salts rows
+- A loss or corruption of audit_trail, audit_anchors, or audit_models rows
+  (per-day salts live in the audit_anchors.salt column)
 - A gap in daily anchor publication exceeding 24 hours
 - An unauthorized write to any of those tables, or unauthorized release of a
   per-day salt

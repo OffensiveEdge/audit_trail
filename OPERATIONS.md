@@ -5,7 +5,7 @@ This document describes the operational posture supporting the integrity claims 
 ## Hosting
 
 - **Application + scheduler**: a single Hetzner Cloud server in Helsinki, Finland (`5.78.208.0`). All PM2 processes (predictions API, scoring, training, analysis, inference, the morning generation job, and the audit anchor publisher) run here. Reverse-proxied via Caddy. Tailnet-gated for all internal endpoints.
-- **Database**: Supabase Cloud (Postgres + Storage). All audit ledgers (`audit_trail`, `audit_anchors`, `audit_anchor_salts`, `audit_models`) and the private `models/` Storage bucket are hosted here.
+- **Database**: Supabase Cloud (Postgres + Storage). All audit ledgers (`audit_trail`, `audit_anchors`, `audit_models`) and the private `models/` Storage bucket are hosted here. (Per-day anchor salts are stored as the `salt` column on `audit_anchors`, not a separate table.)
 - **Source control**: self-hosted Gitea on the same Hetzner server (private; `gitea.offensiveedge.com`, tailnet only).
 - **Public anchor repository**: `github.com/OffensiveEdge/audit_trail` (public).
 - **Scheduler**: n8n in a Docker container on the Hetzner server. Runs the morning generation trigger (08:00 ET) and the audit anchor publisher (09:00 ET).
@@ -28,7 +28,7 @@ This is a single-operator setup. EdgeSeeker discloses this rather than hide it: 
 ## Backups
 
 - **Supabase**: Supabase Cloud manages automatic daily backups of the Postgres database including all audit ledgers. Backup retention follows the Supabase plan in use.
-- **Audit anchor salts**: nightly export of the `audit_anchor_salts` table to Google Drive via the existing n8n backup workflow. Without the salts, past manifest hashes cannot be reproduced — losing them does not invalidate past commitments, but it prevents EdgeSeeker from helping a customer verify a past anchor. The backup mitigates that risk.
+- **Audit anchor salts**: the per-day salts live as the `salt` column on the `audit_anchors` table, so they are covered by the same Supabase daily database backups as the other ledgers (above) — there is no separate salt-table export. Without the salts, past manifest hashes cannot be reproduced — losing them does not invalidate past commitments, but it prevents EdgeSeeker from helping a customer verify a past anchor; the Supabase backups mitigate that risk.
 - **Model artifacts**: the private `models/` Supabase Storage bucket is the source of truth. Originals on the Hetzner server in `service/aiml/models/` are a hot cache; the Supabase copy is the durable one.
 - **Code**: replicated across Gitea on Hetzner and individual developer laptops. The `audit_trail` repository is mirrored at GitHub.
 
@@ -44,7 +44,7 @@ This is a single-operator setup. EdgeSeeker discloses this rather than hide it: 
 |---|---|---|---|
 | Supabase `service_role` key | Operator | `.env` files (Hetzner + laptop), 1Password vault | Rotate quarterly |
 | GitHub deploy key (audit_trail) | Hetzner box | `~/.ssh/audit_trail_deploy` | Read-write to one repo only |
-| Per-day anchor salts | Supabase `audit_anchor_salts` | Service-role only; nightly to Google Drive | Treat backups like keys |
+| Per-day anchor salts | Supabase `audit_anchors.salt` column | Service-role only; covered by Supabase daily backups | Treat backups like keys |
 | n8n API key | Hetzner | `service/server/.env` | Used only for n8n workflow management |
 | `OPS_BACKUPS_TOKEN` | Hetzner | `.env` files | Shared between services + n8n |
 

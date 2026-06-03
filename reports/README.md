@@ -15,24 +15,23 @@ The first daily report is committed on the first day the audit trail is live. Re
 ```json
 {
   "report_date": "YYYY-MM-DD",
-  "coverage_start": "YYYY-MM-DD",
-  "coverage_end": "YYYY-MM-DD",
   "audit_trail_row_count": <int>,
   "outcomes_resolved_count": <int>,
   "metrics": {
     "overall": {
       "hit_rate": <float|null>,
-      "roi_percent": <float|null>,
-      "brier_score": <float|null>,
+      "brier": <float|null>,
       "log_loss": <float|null>,
-      "expected_calibration_error": <float|null>
+      "ece": <float|null>,
+      "n": <int>
     },
     "by_sport": {
-      "<sport>": { ... same shape ... }
+      "<sport>": { ... same shape as overall ... }
     },
     "by_model_id": {
-      "<model_id>": { ... same shape ... }
-    }
+      "<model_id>": { ... same shape as overall ... }
+    },
+    "roi_percent": <float|null>
   },
   "calibration_curve": [
     {"predicted_probability_bin": <float>, "observed_frequency": <float>, "n": <int>}
@@ -44,7 +43,7 @@ The first daily report is committed on the first day the audit trail is live. Re
 
 ## Anchoring
 
-Reports are committed alongside daily anchors. As of `manifest_schema_version: 2`, reports are committed but **not** included in the daily manifest hash. Their GitHub commit timestamp is currently the sole external attestation. A future schema bump will include the report's content hash in the daily manifest so claimed performance is bound by the same cryptographic commitment as predictions and model registrations.
+Reports are committed alongside daily anchors. As of `manifest_schema_version: 3` (current), reports are committed but **not** included in the daily manifest hash. Their GitHub commit timestamp is currently the sole external attestation. A future schema bump (manifest v4) will include the report's content hash in the daily manifest so claimed performance is bound by the same cryptographic commitment as predictions and model registrations.
 
 ## Methodology
 

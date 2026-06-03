@@ -13,15 +13,18 @@ anchors/YYYY-MM-DD.json   Daily salted SHA-256 manifest hash of the day's
                           before the day's games started.
 
 models/<model_id>.json    Registration of each model artifact used in
-                          production: artifact SHA-256, training window,
+                          production: artifact fingerprint, training window,
                           code commit, sport, prediction type. Binary
-                          artifacts are stored privately; the hash bound
-                          here lets a contracted customer verify the bytes.
+                          artifacts are stored privately; the fingerprint
+                          (a Merkle-style hash of the artifact's file contents,
+                          not a hash of the tarball — see METHODOLOGY.md) lets
+                          a contracted customer verify the files.
 
 reports/YYYY-MM-DD.json   Performance and calibration metrics computed from
-                          the audit trail joined with game outcomes. Anchored
-                          into the daily manifest, so claimed performance is
-                          bound to the same timestamps as the predictions.
+                          the audit trail joined with game outcomes. Committed
+                          alongside the daily anchor (so each carries a GitHub
+                          commit timestamp); not yet folded into the salted
+                          manifest hash — see METHODOLOGY.md.
 
 verify.py                 Pure-stdlib Python 3 script that lets anyone
                           independently verify any anchor or any individual
@@ -43,14 +46,14 @@ git clone https://github.com/OffensiveEdge/audit_trail.git
 cd audit_trail
 python verify.py anchor --date 2026-05-20 \
   --predictions predictions_subset.json --salt salt.hex
-# PASS  anchor 2026-05-20: 47 rows hash to 7f3c8e2a… which matches the published anchor
+# PASS  anchor 2026-05-20: 34 predictions + 0 new model registrations hash to 6071446a… which matches the published anchor
 ```
 
 And to confirm an individual prediction's value was not altered:
 
 ```bash
 python verify.py content --predictions predictions_full.json
-# PASS  content: all 47 rows' content_hash values match the recomputed canonical hash of their prediction fields
+# PASS  content: all 34 rows' content_hash values match the recomputed canonical hash of their prediction fields
 ```
 
 ## Try it without a contract

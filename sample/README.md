@@ -61,13 +61,18 @@ contains no real predictions, no real model parameters, no feature values, and
 no feature names. The synthetic anchor here was never committed to a
 production anchor file and is not stamped against the Bitcoin blockchain.
 
-To verify a real anchor you need:
+To verify a real anchor with `verify.py` you need:
 1. A subset of real `audit_trail` rows for that date (provided under contract),
-2. The day's real salt (provided under contract),
+2. The day's real salt (provided under contract), and
 3. The real anchor file at `anchors/YYYY-MM-DD.json` (already public in this
-   repo), and
-4. The real `.ots` proof at `anchors/YYYY-MM-DD.json.ots`, which independently
-   stamps the anchor against Bitcoin.
+   repo).
 
-The sandbox skips steps 1, 2, and 4. Step 3 is replaced by the synthetic
-anchor at `sample/anchors/2099-01-01.json`.
+With those three, `verify.py` confirms the rows match the published anchor, and
+that anchor's GitHub commit timestamp is the external proof of when it existed.
+Separately — and *not* via `verify.py` — each anchor has an OpenTimestamps proof
+at `anchors/YYYY-MM-DD.json.ots` that stamps it against the Bitcoin blockchain;
+you check that yourself with the `ots` tool if you want the Bitcoin attestation
+in addition to the GitHub timestamp.
+
+The sandbox skips items 1 and 2 (no real rows or salt) and the Bitcoin proof.
+Item 3 is replaced by the synthetic anchor at `sample/anchors/2099-01-01.json`.

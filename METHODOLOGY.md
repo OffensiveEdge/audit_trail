@@ -95,18 +95,21 @@ When a model artifact is promoted into production, an immutable registration is 
 ```json
 {
   "model_id": "<string>",
-  "artifact_sha256": "<64-char sha256 of the artifact archive>",
+  "artifact_sha256": "<64-char Merkle-style fingerprint of the artifact's file contents (see below) — NOT a hash of the tarball>",
   "training_window_start": "YYYY-MM-DD",
   "training_window_end": "YYYY-MM-DD",
   "sport": "...",
   "prediction_type": "...",
   "dataset": "...",
   "code_commit_sha": "<git commit of the training code>",
+  "artifact_size_bytes": <int>,
+  "recovered": <bool>,
+  "reproducible": <bool>,
   "recorded_at": "<ISO 8601 UTC timestamp>"
 }
 ```
 
-The artifact bytes themselves are stored privately. Under contract, EdgeSeeker provides the bytes and the customer verifies `sha256(bytes) == artifact_sha256`. A prediction's `model_id` in the audit trail resolves to exactly one entry here.
+The artifact bytes themselves are stored privately. Under contract, EdgeSeeker provides the artifact's files and the customer recomputes `artifact_sha256` and compares. The fingerprint is **not** a flat hash of the `.tar.gz` (gzip/tar framing is not byte-deterministic); it is a Merkle-style hash of the file *contents*: for every file in the artifact directory, sorted by relative path, compute `sha256(file_bytes)`, form the line `"<relative_path>\n<file_sha256>\n"`, concatenate the lines in sorted-path order, and take the `sha256` of that concatenation. A prediction's `model_id` in the audit trail resolves to exactly one entry here.
 
 Model registrations are anchored into the next daily manifest hash after they are committed, so the model lineage is bound to the same external timestamps as the predictions.
 
@@ -120,7 +123,7 @@ The `reports/` directory contains periodic performance metrics computed from the
 - Hit rate and ROI, sliced by sport, category, model_id
 - Calibration curves
 
-Reports are anchored into the daily manifest hash, so claimed performance is bound to the same external timestamps as the predictions it describes. Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
+Reports are committed to this repository alongside the daily anchors, so each carries the external GitHub commit timestamp for its date. They are **not** included in the salted manifest hash (schema v3): a report's metrics are timestamped by their commit but are not yet bound into the cryptographic manifest the way predictions and model registrations are. Folding the report's content hash into the manifest is planned — see the Roadmap (manifest v4). Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
 
 ## Disclosed reconstructed data
 
@@ -139,7 +142,7 @@ python verify.py anchor --date 2026-05-20 \
   --predictions predictions_subset.json --salt salt.hex
 ```
 
-Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file.
+Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file. (The `--predictions` and `--salt` files are supplied under contract and are not in this public repo. To exercise `verify.py` end-to-end with no contract, run it against the synthetic fixture in `sample/` — see `sample/README.md`.) `verify.py` validates the manifest hash and the GitHub-committed anchor; the matching `.ots` Bitcoin proof is checked separately with the OpenTimestamps `ots` tool, not by this script.
 
 ### Mode B — content verification
 

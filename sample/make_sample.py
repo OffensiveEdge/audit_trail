@@ -23,10 +23,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-import secrets
 import sys
 import uuid
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -168,9 +167,9 @@ def main() -> int:
     predictions = _make_predictions()
     models = _make_models()
 
-    # Stable salt for the fixture — committed alongside so the demo is reproducible.
-    salt_hex = "00" * 16 + secrets.token_hex(16)
-    # Make salt deterministic too so regeneration is byte-stable until verify.py changes.
+    # Deterministic salt so the fixture is byte-stable on regeneration (until
+    # verify.py changes, which shifts the baked-in verifier_sha256). Committed
+    # alongside so the demo is fully reproducible.
     salt_hex = hashlib.sha256(b"edgeseeker-sample-salt-2099-01-01").hexdigest()
     salt = bytes.fromhex(salt_hex)
 

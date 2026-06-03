@@ -1,0 +1,14 @@
+# Byte-stability for an integrity repository.
+#
+# verify.py's sha256 is anchored into every manifest and self-checked at
+# runtime; anchor JSON and OpenTimestamps proofs are hashed. A platform
+# line-ending rewrite (e.g. a Windows clone with core.autocrlf=true) would
+# change those bytes and make verification spuriously fail. Force LF on every
+# checkout, and treat .ots proofs as binary so they are never transformed.
+
+* text=auto eol=lf
+*.py   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.hex  text eol=lf
+*.ots  binary

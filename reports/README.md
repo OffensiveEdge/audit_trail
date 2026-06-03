@@ -43,7 +43,7 @@ The first daily report is committed on the first day the audit trail is live. Re
 
 ## Anchoring
 
-Reports are committed alongside daily anchors. As of `manifest_schema_version: 3` (current), reports are committed but **not** included in the daily manifest hash. Their GitHub commit timestamp is currently the sole external attestation. A future schema bump (manifest v4) will include the report's content hash in the daily manifest so claimed performance is bound by the same cryptographic commitment as predictions and model registrations.
+Reports are committed alongside daily anchors. As of `manifest_schema_version: 3` (current), reports are committed but **not** included in the daily manifest hash. Their GitHub commit timestamp is the external attestation for a report's metrics; unlike predictions and model registrations, report contents are not bound into the salted manifest hash.
 
 ## Methodology
 

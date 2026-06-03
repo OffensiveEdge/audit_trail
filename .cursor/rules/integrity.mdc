@@ -1,0 +1,15 @@
+---
+description: Immutable ledger integrity guardrail
+alwaysApply: true
+---
+
+This repository is an immutable, append-only public commitment ledger. Obey `INTEGRITY.md`.
+
+Hard constraints (enforced by the CI integrity guard — violations fail the build):
+
+- Never modify, rename, or delete any file under `anchors/` or `models/` (append-only).
+- Never delete an `anchors/*.ots` proof — it may only be upgraded in place.
+- Never rewrite git history or force-push `main`.
+- Never edit `verify.py` except as an explicitly requested, reviewed verifier change (its sha256 is anchored into every manifest).
+
+When in doubt, stop and ask a human.

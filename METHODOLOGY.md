@@ -15,7 +15,7 @@ Three independent things can be proven from this repository:
 What this repository does *not* prove on its own:
 
 - It does not reveal the predictions themselves. The hash is a one-way commitment. Predictions are revealed only under contract.
-- It does not prove the model is *good*. That is the role of the performance reports (`reports/`) and the walk-forward backtest, anchored by the same daily commits.
+- It does not prove the model is *good*. That is the role of the performance reports (`reports/`), anchored by the same daily commits — and a reproducible walk-forward backtest provided under contract.
 
 ## The chain of evidence
 
@@ -123,7 +123,7 @@ The `reports/` directory contains periodic performance metrics computed from the
 - Hit rate and ROI, sliced by sport, category, model_id
 - Calibration curves
 
-Reports are committed to this repository alongside the daily anchors, so each carries the external GitHub commit timestamp for its date. They are **not** included in the salted manifest hash (schema v3): a report's metrics are timestamped by their commit but are not yet bound into the cryptographic manifest the way predictions and model registrations are. Folding the report's content hash into the manifest is planned — see the Roadmap (manifest v4). Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
+Reports are committed to this repository alongside the daily anchors, so each carries the external GitHub commit timestamp for its date. They are **not** included in the salted manifest hash (schema v3): a report's metrics are timestamped by their commit but are not bound into the cryptographic manifest the way predictions and model registrations are. Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
 
 ## Disclosed reconstructed data
 
@@ -168,13 +168,9 @@ python verify_bitcoin.py --offline          # read each proof's on-chain block, 
 
 ## Roadmap
 
-This repository is the public-facing artifact for an evolving integrity stack. Planned additions:
+The integrity stack described above is complete and operating. One planned addition, gated on business scale rather than engineering:
 
-- **Reproducible walk-forward backtest CLI**: a single command that produces a deterministic backtest report (Brier, log-loss, ECE, ROI) for the expanding-window walk-forward methodology (2022 train → 2023 test, then expanding through 2025). Hashes its inputs and outputs and folds the resulting report hash into the daily anchor. Will replace the assertion of "reproducible walk-forward" with a runnable proof of it.
-- **Manifest v4 — report hashes**: include the day's performance report content hash inside the salted manifest so claimed performance is bound by the same external timestamp as predictions and model registrations.
-- **Data lineage**: for each prediction, the upstream features (and the data sources they came from) will be hashed and anchored alongside the predictions. This closes the loop on the *input* side, complementing the model and prediction registrations on the *output* side.
 - **Independent third-party audit**: at appropriate revenue scale, a security firm will independently verify a sample of anchors and the chain of custody.
-- **OpenTimestamps upgrade automation**: weekly job that upgrades `.ots` proofs to full Bitcoin attestations via `ots upgrade`, removing the "pending calendar" state that brand-new anchors carry for the first few hours.
 
 The methodology in this document is versioned. If it changes materially, the previous version is retained in `methodology/` for historical reference.
 

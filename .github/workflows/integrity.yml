@@ -1,0 +1,31 @@
+name: integrity
+
+# Tamper-evidence for the public commitment ledger. Every push and PR is
+# checked: if a commit modifies, renames, or deletes an already-published
+# anchor or model registration (or removes an .ots proof), the build fails.
+# This makes the append-only guarantee mechanically enforced in public —
+# not merely asserted in prose. See INTEGRITY.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  append-only-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Append-only ledger guard
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 .github/scripts/check_append_only.py

@@ -92,6 +92,23 @@ python verify_bitcoin.py --digests          # just the anchor hashes, no ots
 
 `verify_bitcoin.py` verifies *through* the OpenTimestamps reference client — it never reimplements Bitcoin/merkle validation. For each anchor it confirms the `.ots` proof commits to the exact `sha256` of that anchor file (the same file `verify.py` matched your predictions to), then resolves the Bitcoin attestation to a block + time. The published `.ots` proofs are **upgraded and self-contained** — each carries its Bitcoin block attestation directly, so verification never depends on an OpenTimestamps calendar staying online. **Trust note:** the merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned is fine — it keeps every block header, which is all the proof needs). The client has **no public-explorer fallback**, and that is deliberate: needing your own node is what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify_bitcoin.py --help`.
 
+## Integrity guarantees
+
+This ledger is append-only and tamper-evident — enforced, not just asserted:
+
+- **Cryptographic** — each anchor commits to a salted manifest hash and to
+  `verify.py`'s own hash; every prediction's `content_hash` binds each field,
+  so altering any input breaks the published hash.
+- **Append-only CI guard** — `.github/workflows/integrity.yml` runs on every
+  push and fails if any published `anchors/`/`models/` file is modified,
+  renamed, or deleted, or any `.ots` proof is removed.
+- **Protected history** — `main` blocks force-pushes and branch deletion;
+  history is never rewritten.
+- **Immutable source** — the upstream prediction database is written only by
+  the pipeline and rejects `UPDATE`/`DELETE`.
+
+Full policy and change-control rules: [INTEGRITY.md](INTEGRITY.md).
+
 ## Full protocol
 
 See [METHODOLOGY.md](METHODOLOGY.md) for the full specification: anchor protocol, per-prediction content hash, model registration, performance reports, and disclosed pre-ledger reconstructed data.

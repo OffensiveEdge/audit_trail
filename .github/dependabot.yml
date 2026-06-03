@@ -1,0 +1,24 @@
+# Keeps the pins we set for 1.0.0 from going stale. Dependabot opens a PR when a
+# newer version lands; the append-only integrity guard runs on each PR (these
+# updates touch only CI config / the optional dependency, never the ledger).
+version: 2
+updates:
+  # GitHub Actions — bumps the SHA-pinned actions/checkout (and any others) to a
+  # newer immutable commit, keeping the pin current without manual tracking.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"
+
+  # pip — the sole external dependency, opentimestamps-client, pinned in
+  # requirements-bitcoin.txt (used only by the optional verify_bitcoin.py).
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "deps"

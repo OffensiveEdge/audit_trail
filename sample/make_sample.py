@@ -25,7 +25,7 @@ import hashlib
 import json
 import sys
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -46,7 +46,7 @@ _CONTENT_HASH_FIELDS = (
 )
 
 SAMPLE_DATE = "2099-01-01"          # clearly synthetic, far-future
-SAMPLE_RECORDED_BASE = datetime(2099, 1, 1, 13, 0, 0, tzinfo=UTC)
+SAMPLE_RECORDED_BASE = datetime(2099, 1, 1, 13, 0, 0, tzinfo=timezone.utc)
 
 
 def _canonical_row_payload(row: dict) -> bytes:

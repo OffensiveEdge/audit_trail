@@ -31,3 +31,31 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 .github/scripts/check_append_only.py
+
+  # Self-consistency: the shipped verifier must pass the sample on a clean clone
+  # AND its sha256 must equal the verifier_sha256 baked into the latest anchor.
+  # verify.py's hash is anchored and self-checked, so an accidental edit that
+  # desyncs it from new anchors is caught here — not just detectable, prevented.
+  verifier-self-consistency:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Sample verifies (both modes, zero install)
+        run: |
+          python3 verify.py content --predictions sample/predictions_full.json
+          python3 verify.py anchor --date 2099-01-01 \
+            --predictions sample/predictions_subset.json \
+            --models sample/models.json --salt sample/salt.hex --repo-root sample/
+      - name: verify.py sha256 matches the latest published anchor
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, sys
+          vh = hashlib.sha256(pathlib.Path("verify.py").read_bytes()).hexdigest()
+          latest = sorted(pathlib.Path("anchors").glob("*.json"))[-1]
+          anchored = json.load(open(latest)).get("verifier_sha256")
+          if vh != anchored:
+              print(f"::error::verify.py sha256 {vh[:16]}… != {latest.name} verifier_sha256 "
+                    f"{(anchored or '')[:16]}… — regenerate the sample / re-anchor before shipping a verify.py edit")
+              sys.exit(1)
+          print(f"OK: verify.py matches {latest.name} verifier_sha256 ({vh[:16]}…)")
+          PY

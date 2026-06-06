@@ -1,0 +1,104 @@
+{
+  "audit_trail_row_count": 35,
+  "calibration_curve": [
+    {
+      "bin": "0.5\u20130.6",
+      "n": 1,
+      "observed_frequency": 0.0,
+      "predicted_probability_avg": 0.507
+    },
+    {
+      "bin": "0.6\u20130.7",
+      "n": 28,
+      "observed_frequency": 0.6429,
+      "predicted_probability_avg": 0.6552
+    },
+    {
+      "bin": "0.7\u20130.8",
+      "n": 6,
+      "observed_frequency": 0.8333,
+      "predicted_probability_avg": 0.7078
+    }
+  ],
+  "methodology_version": "v1.0-2026-05-20",
+  "metrics": {
+    "by_model_id": {
+      "2022_2025_0002475314": {
+        "brier": 0.165942,
+        "ece": 0.254677,
+        "hit_rate": 0.8,
+        "log_loss": 0.516449,
+        "n": 5
+      },
+      "2022_2025_0004128914": {
+        "brier": 0.112064,
+        "ece": 0.33476,
+        "hit_rate": 1.0,
+        "log_loss": 0.407607,
+        "n": 1
+      },
+      "2022_2025_0004159614": {
+        "brier": 0.202047,
+        "ece": 0.029723,
+        "hit_rate": 0.666667,
+        "log_loss": 0.59282,
+        "n": 3
+      },
+      "2022_2025_0005434314": {
+        "brier": 0.257849,
+        "ece": 0.30638,
+        "hit_rate": 0.5,
+        "log_loss": 0.707288,
+        "n": 4
+      },
+      "2022_2025_0005519214": {
+        "brier": 0.234717,
+        "ece": 0.060308,
+        "hit_rate": 0.588235,
+        "log_loss": 0.662483,
+        "n": 17
+      },
+      "2022_2025_0007159714": {
+        "brier": 0.177424,
+        "ece": 0.133463,
+        "hit_rate": 0.8,
+        "log_loss": 0.543153,
+        "n": 5
+      }
+    },
+    "by_sport": {
+      "mlb": {
+        "brier": 0.221696,
+        "ece": 0.067406,
+        "hit_rate": 0.636364,
+        "log_loss": 0.635363,
+        "n": 22
+      },
+      "nba": {
+        "brier": 0.156962,
+        "ece": 0.156437,
+        "hit_rate": 0.833333,
+        "log_loss": 0.498309,
+        "n": 6
+      },
+      "nhl": {
+        "brier": 0.233934,
+        "ece": 0.162336,
+        "hit_rate": 0.571429,
+        "log_loss": 0.65823,
+        "n": 7
+      }
+    },
+    "overall": {
+      "brier": 0.213046,
+      "ece": 0.045887,
+      "hit_rate": 0.657143,
+      "log_loss": 0.616441,
+      "n": 35
+    },
+    "roi_percent": null
+  },
+  "outcomes_resolved_count": 35,
+  "published_at": "2026-06-06T11:30:00.421639+00:00",
+  "report_date": "2026-06-06"
+}

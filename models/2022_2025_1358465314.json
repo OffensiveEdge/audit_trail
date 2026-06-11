@@ -1,0 +1,14 @@
+{
+  "artifact_sha256": "9b309cee6baee97ddd9c852aa931a162746d8e18b3c251a2218cfebf562abe1d",
+  "artifact_size_bytes": 5006924,
+  "code_commit_sha": "b6c9803978a45489194b64d27368bdcb1614a3f7",
+  "dataset": "pb",
+  "model_id": "2022_2025_1358465314",
+  "prediction_type": "gamewinner",
+  "recorded_at": "2026-06-11T16:03:35.325486+00:00",
+  "recovered": true,
+  "reproducible": true,
+  "sport": "nhl",
+  "training_window_end": "2025-12-31",
+  "training_window_start": "2022-01-01"
+}

@@ -1,11 +1,47 @@
 {
   "anchor_date": "2026-06-11",
+  "conformal_coverage_policy": {
+    "default": 0.9,
+    "notes": "Per-(sport, season_type) override. Applied at inference time via the v2 conformal-artifact threshold recomputation. Per-row conformal_coverage_target on each audit_trail entry commits to the value actually used for that prediction; see reports/<date>.json by_coverage_target for empirical hit rate by declared tier.",
+    "overrides": [
+      {
+        "season_type": "post",
+        "sport": "mlb",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nba",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "ncaab",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "ncaaf",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nfl",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nhl",
+        "target": 0.8
+      }
+    ]
+  },
   "hash_algorithm": "sha256",
-  "manifest_hash": "bc3e379258f82e0c92f27956e7bcb053ec98338d39688316ef033e073fd0ef44",
-  "manifest_schema_version": 3,
-  "new_model_count": 0,
+  "manifest_hash": "5b33898ab3cc48367b05965e4409312030e27f0cb5a7d8e28a2e23c720dd0a0f",
+  "manifest_schema_version": 4,
+  "new_model_count": 8,
   "prediction_count": 1,
-  "published_at": "2026-06-11T13:00:04.314138+00:00",
+  "published_at": "2026-06-11T17:23:22.039813+00:00",
   "salted": true,
-  "verifier_sha256": "5357b7c2d2dd5936f61b33245478304f0e6e5d1328b8415248e570f7994fbbfd"
+  "verifier_sha256": "16d7736a615310a8c0a06a807c0cd8083559b91d11ccaae5c7a1b89cea7e02d1"
 }

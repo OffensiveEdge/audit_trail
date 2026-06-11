@@ -1,0 +1,14 @@
+{
+  "artifact_sha256": "bce60e44852abde400e2d79d93b3f73f5890639f5b5673e4bf48eb15f3c0964d",
+  "artifact_size_bytes": 6203891,
+  "code_commit_sha": "b6c9803978a45489194b64d27368bdcb1614a3f7",
+  "dataset": "pb",
+  "model_id": "2022_2025_1357426714",
+  "prediction_type": "gamewinner",
+  "recorded_at": "2026-06-11T16:03:31.015281+00:00",
+  "recovered": true,
+  "reproducible": true,
+  "sport": "nba",
+  "training_window_end": "2025-12-31",
+  "training_window_start": "2022-01-01"
+}

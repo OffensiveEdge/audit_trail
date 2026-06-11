@@ -11,12 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 _Staged for the `v1.0.0` tag — the first locked release. Convert this heading to `## [1.0.0] - YYYY-MM-DD` when the tag is cut._
 
 ### Verification
-- `verify.py` — pure-stdlib verifier (Python 3.8+, zero dependencies). Mode A (anchor: predictions + salt → published `manifest_hash`) and Mode B (content: per-row `content_hash`). Self-hashing: refuses to verify an anchor published against a different `verify.py` (`verifier_sha256`).
-- `verify_bitcoin.py` — supplemental, optional Bitcoin-attestation check through the OpenTimestamps reference client (`opentimestamps-client==0.7.2`, pinned in `requirements-bitcoin.txt`). Trustless verification requires a local Bitcoin Core node; `--offline` / `--digests` work without one.
+- `verify.py` — unified verifier (Python 3.8+; pure stdlib for Modes A/B). Three subcommands: `anchor` (Mode A: predictions + salt → published `manifest_hash`), `content` (Mode B: per-row `content_hash`), and `bitcoin` (Mode C: OpenTimestamps + Bitcoin attestation). Self-hashing: refuses to verify an anchor published against a different `verify.py` (`verifier_sha256`).
+- The pre-v1.0 standalone `verify_bitcoin.py` was folded into `verify.py bitcoin` for v1.0 — one verifier, one `verifier_sha256`, one CLI surface. The pre-v1.0 file remains in git history for verifying pre-v1.0 anchors: `git checkout <pre-v1.0-commit> -- verify_bitcoin.py`.
+- The `bitcoin` subcommand requires the OpenTimestamps reference client (`opentimestamps-client==0.7.2`, pinned in `requirements-bitcoin.txt`) only when invoked. Modes A/B don't need it. Trustless Bitcoin verification still requires a local Bitcoin Core node; `--offline` / `--digests` work without one.
+- Schema-version dispatch table inside `verify.py`. Future protocol bumps that share the canonical hashed payload register a new schema version against the existing handler — no new verifier file, no `verifier_sha256` transition.
 
 ### Protocol
 - Manifest schema **v3**: salted SHA-256 over `{predictions, new_models, verifier_sha256}`. Reports are committed and GitHub-commit-timestamped but **not** folded into the manifest hash.
-- Per-prediction `content_hash` over the fixed prediction-field set (documented in `verify.py` / `METHODOLOGY.md`).
+- Manifest schema **v4**: bumps schema version on the public anchor file to surface the `conformal_coverage_policy` in force on the anchor date — per-(sport, season_type) coverage targets, structured for verifier consumption. The canonical manifest hash itself is unchanged from v3 (still `{predictions, new_models, verifier_sha256}`); the policy block is human-readable disclosure. Per-row `conformal_coverage_target` joins the existing prediction-field set so each `content_hash` commits to the value actually applied at decision time.
+- Per-prediction `content_hash` over the fixed prediction-field set (documented in `verify.py` / `METHODOLOGY.md`). Field set extended with `conformal_coverage_target` for predictions from 2026-06-11 forward.
 - Model registrations carry a Merkle-style `artifact_sha256` (of file contents, not the tarball).
 
 ### Integrity & operations

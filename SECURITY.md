@@ -5,9 +5,9 @@ independent verifier. We take reports about its integrity seriously.
 
 ## What we want to hear about
 
-- A flaw in `verify.py` or `verify_bitcoin.py` — e.g. a way to make verification
-  **pass** for predictions that were never committed, or **fail** for ones that
-  were.
+- A flaw in `verify.py` (any subcommand: `anchor`, `content`, `bitcoin`) — e.g.
+  a way to make verification **pass** for predictions that were never committed,
+  or **fail** for ones that were.
 - A weakness in the anchoring / manifest protocol (see `METHODOLOGY.md`) — for
   example, a way to forge or alter a `manifest_hash`, `content_hash`, or
   `verifier_sha256` binding.
@@ -30,7 +30,7 @@ silent edits).
 ## Scope
 
 **In scope** — the public surface of this repository:
-- `verify.py`, `verify_bitcoin.py`
+- `verify.py` (subcommands: `anchor`, `content`, `bitcoin`)
 - the manifest / anchor protocol and methodology
 - the integrity CI guard
 - the published ledger artifacts (`anchors/`, `models/`, `reports/`, `.ots` proofs)

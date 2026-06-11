@@ -39,7 +39,7 @@ sample/                   Synthetic, runnable fixture so anyone can exercise
 
 ## Quick verification
 
-> **Requirements:** `verify.py` is pure Python standard library — **Python 3.8+**, no third-party packages, no network. (The optional Bitcoin check, `verify_bitcoin.py`, has one pinned dependency — see below.)
+> **Requirements:** the core verifier (subcommands `anchor` and `content`) is pure Python standard library — **Python 3.8+**, no third-party packages, no network. The optional `bitcoin` subcommand has one pinned dependency — see below.
 
 If you are a contracted customer and have been given a set of predictions and the day's salt, you can confirm they match the public anchor:
 
@@ -80,19 +80,21 @@ python verify.py anchor \
 
 Both should print `PASS`. Everything in `sample/` is fabricated — no real predictions, features, or model parameters are exposed. See [`sample/README.md`](sample/README.md) for the full description of what the fixture proves (and doesn't).
 
-## Supplemental: Bitcoin attestation (optional)
+## Bitcoin attestation subcommand (optional)
 
-`verify.py` proves predictions → anchor file, dated by that file's **GitHub commit timestamp**, with zero dependencies and no network. Each anchor *also* carries an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) that stamps it to the **Bitcoin** blockchain — an independent timestamp that doesn't rely on trusting GitHub's clock. Checking that is an **optional, supplemental** step, kept in a separate script so the core verifier stays pure-stdlib and offline:
+Modes A/B above prove predictions → anchor file, dated by that file's **GitHub commit timestamp**, with zero dependencies and no network. Each anchor *also* carries an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) that stamps it to the **Bitcoin** blockchain — an independent timestamp that doesn't rely on trusting GitHub's clock. Checking that is an **optional, supplemental** step via the `bitcoin` subcommand. The subcommand lazy-loads the `ots` CLI only when invoked, so Modes A/B keep their pure-stdlib, offline property:
 
 ```bash
-pip install -r requirements-bitcoin.txt    # the `ots` client (opentimestamps-client==0.7.2, pinned)
-python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
-python verify_bitcoin.py --date 2026-05-20  # one anchor
-python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network
-python verify_bitcoin.py --digests          # just the anchor hashes, no ots
+pip install -r requirements-bitcoin.txt              # the `ots` client (opentimestamps-client==0.7.2, pinned)
+python verify.py bitcoin                              # all anchors  (needs a local Bitcoin node)
+python verify.py bitcoin --date 2026-05-20            # one anchor
+python verify.py bitcoin --offline                    # read each proof's on-chain block, no node/network
+python verify.py bitcoin --digests                    # just the anchor hashes, no ots
 ```
 
-`verify_bitcoin.py` verifies *through* the OpenTimestamps reference client — it never reimplements Bitcoin/merkle validation. For each anchor it confirms the `.ots` proof commits to the exact `sha256` of that anchor file (the same file `verify.py` matched your predictions to), then resolves the Bitcoin attestation to a block + time. The published `.ots` proofs are **upgraded and self-contained** — each carries its Bitcoin block attestation directly, so verification never depends on an OpenTimestamps calendar staying online. **Trust note:** the merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned is fine — it keeps every block header, which is all the proof needs). The client has **no public-explorer fallback**, and that is deliberate: needing your own node is what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify_bitcoin.py --help`.
+The `bitcoin` subcommand verifies *through* the OpenTimestamps reference client — it never reimplements Bitcoin/merkle validation. For each anchor it confirms the `.ots` proof commits to the exact `sha256` of that anchor file (the same file Mode A matched your predictions to), then resolves the Bitcoin attestation to a block + time. The published `.ots` proofs are **upgraded and self-contained** — each carries its Bitcoin block attestation directly, so verification never depends on an OpenTimestamps calendar staying online. **Trust note:** the merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned is fine — it keeps every block header, which is all the proof needs). The client has **no public-explorer fallback**, and that is deliberate: needing your own node is what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify.py bitcoin --help`.
+
+> Pre-v1.0 anchors were checked by a separate `verify_bitcoin.py` script that this subcommand replaces. The pre-v1.0 file remains in git history for verifying pre-v1.0 anchors: `git checkout <pre-v1.0-commit> -- verify_bitcoin.py`.
 
 ## Integrity guarantees
 

@@ -60,7 +60,7 @@ The canonical manifest payload (v3) commits to predictions, newly registered mod
 
 Including the verifier's own hash in the manifest prevents a future tampered `verify.py` from silently re-verifying past anchors. The verifier self-checks: it computes its own sha256 at runtime and refuses to run if the anchor it's verifying was published against a different verifier.
 
-The public anchor file is small and contains only public counts plus the verifier hash:
+The public anchor file is small and contains only public counts plus the verifier hash plus the conformal coverage policy in force on the anchor date:
 
 ```json
 {
@@ -71,14 +71,41 @@ The public anchor file is small and contains only public counts plus the verifie
   "verifier_sha256": "<64-char sha256>",
   "salted": true,
   "hash_algorithm": "sha256",
-  "manifest_schema_version": 3,
+  "manifest_schema_version": 4,
+  "conformal_coverage_policy": {
+    "default": 0.90,
+    "overrides": [
+      {"sport": "mlb",   "season_type": "post", "target": 0.80},
+      {"sport": "nba",   "season_type": "post", "target": 0.80},
+      {"sport": "ncaab", "season_type": "post", "target": 0.80},
+      {"sport": "ncaaf", "season_type": "post", "target": 0.80},
+      {"sport": "nfl",   "season_type": "post", "target": 0.80},
+      {"sport": "nhl",   "season_type": "post", "target": 0.80}
+    ],
+    "notes": "..."
+  },
   "published_at": "<ISO 8601 UTC timestamp>"
 }
 ```
 
 Once published, the commit timestamp on GitHub is external evidence that this hash existed at that time. EdgeSeeker cannot alter the commit timestamp; GitHub records it.
 
-The manifest schema is versioned. v1 anchors (never published) hashed only predictions. v2 (never published) added new_models. v3 (current) adds verifier_sha256. Each anchor file declares its `manifest_schema_version` so verifiers can dispatch correctly.
+The manifest schema is versioned. v1 anchors (never published) hashed only predictions. v2 (never published) added new_models. v3 added verifier_sha256. v4 (current) adds `conformal_coverage_policy` — the per-(sport, season_type) coverage target rule in force on the anchor date. Each anchor file declares its `manifest_schema_version` so verifiers can dispatch correctly. The policy block is human-readable disclosure; the per-row coverage target each prediction was actually evaluated against is committed into that row's `content_hash` (see "Per-prediction content hash" below) — so the policy stated here is verifiable against actual usage row-by-row.
+
+## Conformal coverage policy
+
+EdgeSeeker uses a conformal prediction filter — not a hand-tuned probability threshold — to decide which model outputs are promoted from "skip" to "bet" at the customer surface. The filter is parameterized by a **coverage target**: the probability that the credible set output by the conformal layer contains the true outcome. At a 90% coverage target, the credible set covers the true outcome 90% of the time (under exchangeability). Lower coverage = tighter credible sets = more rows promoted to bet.
+
+The current policy is:
+
+| Sport | Season type | Coverage target |
+|---|---|---|
+| All | Regular season | 0.90 |
+| MLB, NBA, NCAAB, NCAAF, NFL, NHL | Postseason | 0.80 |
+
+The lower postseason target reflects an empirical observation: best-vs-best matchups during playoffs have structurally higher single-game variance, and the regular-season-calibrated 90% gate over-rejects relative to the underlying signal. The 0.80 postseason target accepts a 20% credible-set error rate (vs 10% in regular season) in exchange for surfacing picks during the highest-variance segment of each season. Customers see this as a wider denominator on postseason bet counts and a published empirical hit rate per coverage tier in the daily report (see "Performance and calibration reports" below — `by_coverage_target` slice).
+
+Per-(sport, season_type) refinement (different coverage, per-bet-type variation, per-sport calibration-window changes) is expected as each sport's pipeline gets its dedicated overhaul. The unified 0.90 / 0.80 split is the *starting* rule. Changes are disclosed by version-bumping the policy block on the next daily anchor — the previous policy stays verifiable on its anchored manifest.
 
 ## Per-prediction content hash
 
@@ -120,10 +147,12 @@ From 2026-06-01, the private registration additionally records the model's held-
 The `reports/` directory contains periodic performance metrics computed from the audit trail joined with game outcomes:
 
 - Brier score, log-loss, expected calibration error (ECE)
-- Hit rate and ROI, sliced by sport, category, model_id
+- Hit rate and ROI, sliced by sport, category, model_id, **and coverage target**
 - Calibration curves
 
-Reports are committed to this repository alongside the daily anchors, so each carries the external GitHub commit timestamp for its date. They are **not** included in the salted manifest hash (schema v3): a report's metrics are timestamped by their commit but are not bound into the cryptographic manifest the way predictions and model registrations are. Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
+The `by_coverage_target` slice publishes the empirical hit rate for each declared coverage tier (e.g. all picks declared at the 0.80 target, all picks declared at 0.90). Verifiers can compare each tier's empirical rate against the policy stated on that day's anchor (`conformal_coverage_policy.overrides` and `.default`) — declared vs achieved coverage row-by-row.
+
+Reports are committed to this repository alongside the daily anchors, so each carries the external GitHub commit timestamp for its date. They are **not** included in the salted manifest hash (schema v4): a report's metrics are timestamped by their commit but are not bound into the cryptographic manifest the way predictions and model registrations are. Performance reports begin from the first day the audit trail was live; metrics before that date are reported separately via reproducible walk-forward backtest, not via this repository.
 
 ## Disclosed reconstructed data
 
@@ -142,7 +171,7 @@ python verify.py anchor --date 2026-05-20 \
   --predictions predictions_subset.json --salt salt.hex
 ```
 
-Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file. (The `--predictions` and `--salt` files are supplied under contract and are not in this public repo. To exercise `verify.py` end-to-end with no contract, run it against the synthetic fixture in `sample/` — see `sample/README.md`.) `verify.py` validates the manifest hash and the GitHub-committed anchor; the matching `.ots` Bitcoin proof is checked separately by the supplemental `verify_bitcoin.py` (which wraps the OpenTimestamps `ots` client), not by `verify.py` itself — that keeps the core verifier pure-stdlib and offline. See the "Verification" steps below.
+Confirms that a set of rows (and the day's salt, which EdgeSeeker provides under contract) hashes to the value published in `anchors/2026-05-20.json`. If it does, those rows were committed to this repository at the GitHub commit timestamp for that anchor file. (The `--predictions` and `--salt` files are supplied under contract and are not in this public repo. To exercise `verify.py` end-to-end with no contract, run it against the synthetic fixture in `sample/` — see `sample/README.md`.) Mode A validates the manifest hash and the GitHub-committed anchor using pure stdlib; the matching `.ots` Bitcoin proof is checked by the `bitcoin` subcommand below (which wraps the OpenTimestamps `ots` client) — that keeps Modes A/B pure-stdlib and offline while still bundling the Bitcoin check into the same verifier file.
 
 ### Mode B — content verification
 
@@ -154,17 +183,20 @@ For each row, recomputes `sha256(canonical_json(prediction_fields))` and confirm
 
 Mode A and Mode B together give a complete proof for any historical prediction: *this exact prediction* existed at *this exact time*.
 
-### Supplemental — Bitcoin attestation (optional)
+### Mode C — Bitcoin attestation (optional)
 
-Modes A/B date an anchor by its **GitHub commit timestamp**. Each anchor also has an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) stamping it to the **Bitcoin** blockchain — an independent timestamp that does not rely on GitHub's clock. This is checked by a separate script so the core verifier keeps its pure-stdlib, offline, zero-dependency property:
+Modes A/B date an anchor by its **GitHub commit timestamp**. Each anchor also has an OpenTimestamps proof (`anchors/YYYY-MM-DD.json.ots`) stamping it to the **Bitcoin** blockchain — an independent timestamp that does not rely on GitHub's clock. This is checked by the `bitcoin` subcommand, which lazy-loads the `ots` CLI only when invoked, so Modes A/B stay pure-stdlib, offline, zero-dependency:
 
 ```bash
-pip install -r requirements-bitcoin.txt    # the `ots` client (opentimestamps-client==0.7.2, pinned)
-python verify_bitcoin.py                    # all anchors  (needs a local Bitcoin node)
-python verify_bitcoin.py --offline          # read each proof's on-chain block, no node/network
+pip install -r requirements-bitcoin.txt          # the `ots` client (opentimestamps-client==0.7.2, pinned)
+python verify.py bitcoin                          # all anchors  (needs a local Bitcoin node)
+python verify.py bitcoin --offline                # read each proof's on-chain block, no node/network
+python verify.py bitcoin --digests                # just print anchor file sha256s; no ots needed
 ```
 
-`verify_bitcoin.py` verifies *through* the OpenTimestamps reference client (it never reimplements Bitcoin/merkle validation): for each anchor it confirms the `.ots` proof commits to the exact `sha256` of the anchor file Mode A matched, then resolves the attestation to a Bitcoin block + time. The published `.ots` proofs are upgraded and self-contained — each carries its Bitcoin block attestation directly, so verification does not depend on any OpenTimestamps calendar remaining online. The merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned suffices — it retains every block header); the client has no public-explorer fallback, which is precisely what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify_bitcoin.py --help`.
+The `bitcoin` subcommand verifies *through* the OpenTimestamps reference client (it never reimplements Bitcoin/merkle validation): for each anchor it confirms the `.ots` proof commits to the exact `sha256` of the anchor file Mode A matched, then resolves the attestation to a Bitcoin block + time. The published `.ots` proofs are upgraded and self-contained — each carries its Bitcoin block attestation directly, so verification does not depend on any OpenTimestamps calendar remaining online. The merkle path is checked locally, but confirming the block is real requires **your own Bitcoin Core node** (pruned suffices — it retains every block header); the client has no public-explorer fallback, which is precisely what makes the check fully trustless. Without a node, `--offline` reads the Bitcoin block each proof already contains. Full runbook: `python verify.py bitcoin --help`.
+
+Pre-v1.0 anchors were verified by a separate `verify_bitcoin.py` script; v1.0 folded that into `verify.py bitcoin` so customers maintain a single verifier file. The pre-v1.0 verify_bitcoin.py remains in git history (`git checkout <pre-v1.0-commit> -- verify_bitcoin.py`) for verifying pre-v1.0 anchors with their original tooling.
 
 ## Roadmap
 

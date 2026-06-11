@@ -132,7 +132,9 @@ When a model artifact is promoted into production, an immutable registration is 
   "artifact_size_bytes": <int>,
   "recovered": <bool>,
   "reproducible": <bool>,
-  "recorded_at": "<ISO 8601 UTC timestamp>"
+  "recorded_at": "<ISO 8601 UTC timestamp>",
+  "is_canonical": <bool>,
+  "canonicalized_at": "<ISO 8601 UTC timestamp, or null>"
 }
 ```
 
@@ -141,6 +143,8 @@ The artifact bytes themselves are stored privately. Under contract, EdgeSeeker p
 Model registrations are anchored into the next daily manifest hash after they are committed, so the model lineage is bound to the same external timestamps as the predictions.
 
 From 2026-06-01, the private registration additionally records the model's held-out validation metrics (ROC-AUC, F1, precision, recall, balanced accuracy, MCC, accuracy) captured at registration. These are not printed in the public file above, but they live inside the artifact archive (`metrics.json`) whose `artifact_sha256` is published here and anchored — so under the same bytes-disclosure contract, a customer verifies the metrics against the anchored hash, with no change to the manifest format. Models registered before that date predate the field; their training-time performance is provided via reproducible walk-forward backtest.
+
+From 2026-06-11, each model file carries two additional lifecycle fields: `is_canonical` and `canonicalized_at`. `is_canonical = true` indicates the model was deliberately promoted to serve customers (a Promote action in the operator's training-lineage UI). `is_canonical = false` indicates a training or discovery candidate that was registered but never reached production — kept in the registry for transparency, hidden from the default per-slot lineage view on EdgeSeeker's `/verification` page. `canonicalized_at` is the timestamp of the Promote moment for models promoted on or after 2026-06-11. For canonical models predating this field (the backfill set), `canonicalized_at = recorded_at` is used as a best-available proxy; the same disclosure is mirrored in EdgeSeeker's UI as "Activated on or before <date>." Lifecycle fields are additive and do not change the canonical manifest hash; older `models/*.json` files predating this addition simply lack the two keys.
 
 ## Performance and calibration reports
 

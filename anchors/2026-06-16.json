@@ -1,0 +1,47 @@
+{
+  "anchor_date": "2026-06-16",
+  "conformal_coverage_policy": {
+    "default": 0.9,
+    "notes": "Per-(sport, season_type) override. Applied at inference time via the v2 conformal-artifact threshold recomputation. Per-row conformal_coverage_target on each audit_trail entry commits to the value actually used for that prediction; see reports/<date>.json by_coverage_target for empirical hit rate by declared tier.",
+    "overrides": [
+      {
+        "season_type": "post",
+        "sport": "mlb",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nba",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "ncaab",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "ncaaf",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nfl",
+        "target": 0.8
+      },
+      {
+        "season_type": "post",
+        "sport": "nhl",
+        "target": 0.8
+      }
+    ]
+  },
+  "hash_algorithm": "sha256",
+  "manifest_hash": "ad0d4a2e7a9ebf510c359f16d047571b22a761c884bfbaa4236f827b7b70a0b9",
+  "manifest_schema_version": 4,
+  "new_model_count": 0,
+  "prediction_count": 30,
+  "published_at": "2026-06-16T13:00:01.789966+00:00",
+  "salted": true,
+  "verifier_sha256": "16d7736a615310a8c0a06a807c0cd8083559b91d11ccaae5c7a1b89cea7e02d1"
+}

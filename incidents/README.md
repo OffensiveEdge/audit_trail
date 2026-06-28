@@ -57,3 +57,7 @@ For any qualifying incident:
   — a data-ingestion outage suppressed MLB predictions 2026-05-28 → 2026-05-31 and
   caused no daily anchor to publish for 2026-05-31. No customer impact; no ledger row
   altered; ingestion fixed and inputs backfilled. Resolved.
+- [`2026-06-28-mlb-pause-hardware-migration.md`](2026-06-28-mlb-pause-hardware-migration.md)
+  — MLB prediction pipeline taken offline 2026-06-25 for migration to upgraded
+  training hardware. No customer impact; no ledger row altered; other sports
+  unaffected. No estimated re-enable date. Ongoing.
